@@ -1,0 +1,1886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>AeroCheck Mobile UI</title>
+  <style>
+    :root {
+      --bg: #e9edf3;
+      --phone: #f7f9fc;
+      --card: rgba(255,255,255,.94);
+      --card-soft: rgba(255,255,255,.72);
+      --text: #10263f;
+      --muted: #6e7d90;
+      --line: rgba(16,38,63,.08);
+      --primary: #0d4d87;
+      --primary-2: #1d5f9d;
+      --primary-3: #5a89b8;
+      --blue-soft: #dbe8f5;
+      --success: #15a46f;
+      --warning: #e7a63f;
+      --danger: #db6262;
+      --shadow: 0 18px 40px rgba(13,32,60,.14);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: var(--bg); font-family: var(--font); color: var(--text); }
+    body {
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .stage {
+      display: grid;
+      gap: 16px;
+      justify-items: center;
+    }
+
+    .hint {
+      font-size: 13px;
+      color: #607087;
+      text-align: center;
+      max-width: 480px;
+      line-height: 1.45;
+    }
+
+    .phone {
+      position: relative;
+      width: 390px;
+      height: 844px;
+      background: linear-gradient(180deg, #2a6ca6 0%, #5b8dbb 19%, #edf3f8 48%, #f8fbfd 100%);
+      border-radius: 38px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      border: 8px solid #0d1016;
+      isolation: isolate;
+    }
+
+    .notch {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 124px;
+      height: 28px;
+      background: #090b10;
+      border-radius: 999px;
+      z-index: 15;
+    }
+
+    .app {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      padding-top: calc(18px + var(--safe-top));
+      padding-bottom: calc(18px + var(--safe-bottom));
+    }
+
+    .statusbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 22px 8px;
+      color: rgba(255,255,255,.95);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .02em;
+      z-index: 5;
+    }
+
+    .status-icons {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      opacity: .92;
+    }
+
+    .sync-toast {
+      position: absolute;
+      top: 56px;
+      left: 20px;
+      right: 20px;
+      z-index: 20;
+      transform: translateY(-18px);
+      opacity: 0;
+      pointer-events: none;
+      transition: .32s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(14,46,79,.92);
+      color: white;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 14px 28px rgba(7,20,39,.25);
+      font-size: 13px;
+    }
+
+    .sync-toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .screen {
+      display: none;
+      flex: 1;
+      min-height: 0;
+      padding: 8px 16px 0;
+      overflow: hidden;
+    }
+
+    .screen.active { display: flex; flex-direction: column; }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 4px 2px 12px;
+      color: white;
+    }
+
+    .topbar.left-title { justify-content: flex-start; gap: 10px; }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(255,255,255,.16);
+      color: inherit;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+    }
+
+    .hero {
+      padding: 4px 4px 14px;
+      color: white;
+    }
+
+    .eyebrow {
+      font-size: 12px;
+      opacity: .86;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: 58px;
+      line-height: .95;
+      font-weight: 300;
+      letter-spacing: -.04em;
+    }
+
+    .hero-plane {
+      display: grid;
+      place-items: center;
+      padding: 6px 0 12px;
+      min-height: 148px;
+    }
+
+    .hero-plane svg {
+      width: 122px;
+      filter: drop-shadow(0 10px 24px rgba(255,255,255,.22));
+      opacity: .98;
+    }
+
+    .search-chips,
+    .flight-filters {
+      display: flex;
+      gap: 8px;
+      overflow: auto;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+
+    .search-chips::-webkit-scrollbar,
+    .flight-filters::-webkit-scrollbar,
+    .content-scroll::-webkit-scrollbar { display: none; }
+
+    .chip {
+      border: none;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.2);
+      color: white;
+      font-size: 12px;
+      white-space: nowrap;
+      display: inline-flex;
+      gap: 7px;
+      align-items: center;
+      backdrop-filter: blur(10px);
+    }
+
+    .chip.active {
+      background: white;
+      color: var(--text);
+      box-shadow: 0 8px 16px rgba(24,40,60,.12);
+    }
+
+    .floating-card,
+    .panel,
+    .sheet,
+    .ticket-card,
+    .flight-card,
+    .summary-card,
+    .auth-card {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,.75);
+      border-radius: var(--radius-xl);
+      box-shadow: 0 15px 38px rgba(18,40,69,.08);
+      backdrop-filter: blur(18px);
+    }
+
+    .floating-card {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .route-box {
+      background: white;
+      border-radius: 24px;
+      padding: 14px;
+      border: 1px solid rgba(16,38,63,.06);
+      position: relative;
+    }
+
+    .route-box + .route-box { margin-top: 10px; }
+
+    .label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+      margin-bottom: 4px;
+      font-weight: 700;
+    }
+
+    .code {
+      font-size: 36px;
+      line-height: 1;
+      letter-spacing: -.04em;
+      margin-bottom: 2px;
+    }
+
+    .route-sub {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .swap-btn {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid var(--line);
+      background: #f7fafc;
+      color: var(--primary);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+    }
+
+    .actions-row { display: grid; grid-template-columns: 44px 1fr 44px; gap: 10px; }
+
+    .round-action {
+      border: none;
+      border-radius: 18px;
+      background: #edf3f8;
+      color: var(--primary);
+      font-size: 18px;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+    }
+
+    .cta-btn,
+    .secondary-btn,
+    .ghost-btn,
+    .google-btn,
+    .tab-btn,
+    .seat,
+    .small-btn {
+      border: none;
+      cursor: pointer;
+      font: inherit;
+    }
+
+    .cta-btn {
+      min-height: 48px;
+      border-radius: 16px;
+      background: linear-gradient(180deg, var(--primary-2), var(--primary));
+      color: white;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 12px 22px rgba(12, 74, 132, .25);
+      padding: 0 18px;
+    }
+
+    .secondary-btn {
+      min-height: 46px;
+      border-radius: 15px;
+      background: #edf3f8;
+      color: var(--primary);
+      padding: 0 14px;
+      font-weight: 700;
+    }
+
+    .ghost-btn,
+    .small-btn {
+      background: transparent;
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .small-btn { font-size: 13px; }
+
+    .auth-tabs,
+    .inline-toggle,
+    .segmented {
+      display: flex;
+      gap: 8px;
+    }
+
+    .tab-btn,
+    .seg-btn {
+      flex: 1;
+      min-height: 42px;
+      border-radius: 14px;
+      background: #edf3f8;
+      color: #678;
+      font-weight: 700;
+    }
+
+    .tab-btn.active,
+    .seg-btn.active {
+      background: white;
+      color: var(--primary);
+      box-shadow: 0 6px 16px rgba(20,38,60,.08);
+    }
+
+    .content-scroll {
+      flex: 1;
+      overflow: auto;
+      padding-bottom: 10px;
+      scrollbar-width: none;
+    }
+
+    .auth-card,
+    .panel,
+    .sheet {
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .auth-title,
+    .section-title,
+    .sheet-title,
+    .panel-title {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -.03em;
+      margin: 0;
+    }
+
+    .subtext,
+    .panel-sub,
+    .muted {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .form-grid { display: grid; gap: 12px; margin-top: 14px; }
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .input-wrap,
+    .select-wrap,
+    .textarea-wrap {
+      display: grid;
+      gap: 8px;
+    }
+
+    .input-wrap label,
+    .select-wrap label,
+    .textarea-wrap label,
+    .field-label {
+      font-size: 12px;
+      font-weight: 800;
+      color: #567;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      min-width: 0;
+      border: 1px solid rgba(16,38,63,.08);
+      background: white;
+      border-radius: 16px;
+      min-height: 48px;
+      padding: 0 14px;
+      font: inherit;
+      color: var(--text);
+      outline: none;
+      transition: border-color .2s ease, box-shadow .2s ease;
+    }
+
+    textarea {
+      min-height: 88px;
+      padding: 12px 14px;
+      resize: vertical;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: rgba(13,77,135,.34);
+      box-shadow: 0 0 0 4px rgba(13,77,135,.08);
+    }
+
+    .google-btn {
+      min-height: 48px;
+      border-radius: 16px;
+      background: white;
+      border: 1px solid rgba(16,38,63,.08);
+      color: var(--text);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .google-mark {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: inline-grid;
+      place-items: center;
+      font-size: 12px;
+      background: conic-gradient(#4285f4 0 25%, #34a853 0 50%, #fbbc05 0 75%, #ea4335 0);
+      color: white;
+      font-weight: 900;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 10px;
+      margin: 4px 2px 12px;
+      color: white;
+    }
+
+    .section-head .section-title { color: white; }
+    .section-head .muted { color: rgba(255,255,255,.82); margin-top: 2px; }
+
+    .flight-card,
+    .ticket-card,
+    .summary-card {
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    .airline-row,
+    .ticket-top,
+    .mini-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      min-width: 0;
+    }
+
+    .brand-badge {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(180deg, #7d2446, #4e1731);
+      color: #f6e7c9;
+      display: grid;
+      place-items: center;
+      font-size: 11px;
+      font-weight: 700;
+      flex: 0 0 auto;
+    }
+
+    .brand-info { min-width: 0; }
+    .brand-name, .flight-name, .ticket-name {
+      font-size: 14px;
+      font-weight: 800;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .brand-sub, .mini-sub {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    .pill {
+      background: #eef4fa;
+      color: var(--primary);
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .route-line {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 2px 6px;
+    }
+
+    .route-end strong,
+    .ticket-code {
+      display: block;
+      font-size: 28px;
+      letter-spacing: -.04em;
+      font-weight: 300;
+      line-height: 1;
+    }
+
+    .route-end:last-child { text-align: right; }
+
+    .plane-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--primary);
+      min-width: 90px;
+    }
+
+    .plane-line::before,
+    .plane-line::after {
+      content: "";
+      height: 1px;
+      background: rgba(13,77,135,.22);
+      flex: 1;
+    }
+
+    .meta-row,
+    .ticket-meta,
+    .detail-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .meta-row {
+      grid-template-columns: repeat(3, 1fr);
+      border-top: 1px solid var(--line);
+      padding-top: 10px;
+    }
+
+    .mini-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .mini-value {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .detail-grid {
+      grid-template-columns: 1fr 1fr;
+      border-top: 1px solid var(--line);
+      margin-top: 14px;
+      padding-top: 14px;
+    }
+
+    .lookup-hero {
+      color: white;
+      padding: 6px 4px 10px;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin: 8px 0 14px;
+    }
+
+    .step {
+      display: grid;
+      gap: 6px;
+      justify-items: center;
+      text-align: center;
+      color: white;
+      opacity: .75;
+    }
+
+    .step-dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.18);
+      border: 1px solid rgba(255,255,255,.22);
+      display: grid;
+      place-items: center;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .step.active,
+    .step.done { opacity: 1; }
+    .step.active .step-dot { background: white; color: var(--primary); }
+    .step.done .step-dot { background: rgba(255,255,255,.28); }
+    .step-label { font-size: 11px; line-height: 1.2; }
+
+    .scan-box {
+      border-radius: 24px;
+      background: linear-gradient(180deg, #edf5fb, #fdfefe);
+      border: 1px dashed rgba(13,77,135,.24);
+      padding: 18px;
+      text-align: center;
+      display: grid;
+      gap: 12px;
+      place-items: center;
+    }
+
+    .passport-shell {
+      width: 120px;
+      aspect-ratio: 0.75;
+      border-radius: 20px;
+      background: linear-gradient(180deg, #0f4c83, #14416b);
+      color: white;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 16px 32px rgba(10,38,65,.18);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .passport-shell::before {
+      content: "";
+      position: absolute;
+      inset: 12px;
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 14px;
+    }
+
+    .scan-line {
+      width: 90%;
+      height: 3px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, transparent, #4cc2ff, transparent);
+      box-shadow: 0 0 18px rgba(76,194,255,.85);
+      animation: scan 2.4s linear infinite;
+      position: absolute;
+      top: 28%;
+    }
+
+    @keyframes scan {
+      0% { transform: translateY(-10px); opacity: .3; }
+      50% { transform: translateY(74px); opacity: 1; }
+      100% { transform: translateY(154px); opacity: .3; }
+    }
+
+    .ocr-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .ocr-box {
+      background: #f7fafc;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px;
+    }
+
+    .seat-map {
+      background: #f8fbfd;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 14px;
+    }
+
+    .seat-map-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 14px;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .seat-grid {
+      display: grid;
+      gap: 8px;
+    }
+
+    .seat-row {
+      display: grid;
+      grid-template-columns: 20px repeat(3, 1fr) 26px repeat(3, 1fr);
+      gap: 6px;
+      align-items: center;
+    }
+
+    .row-label,
+    .aisle-label {
+      font-size: 12px;
+      color: var(--muted);
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .seat {
+      min-height: 34px;
+      border-radius: 10px;
+      background: #eef3f7;
+      color: var(--text);
+      font-weight: 800;
+      font-size: 11px;
+      transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+    }
+
+    .seat.available:hover { transform: translateY(-1px); }
+    .seat.occupied { background: #d8e1ea; color: #8b98a8; cursor: not-allowed; }
+    .seat.premium { background: #f7ead2; color: #9b6f1e; }
+    .seat.selected { background: var(--primary); color: white; box-shadow: 0 10px 18px rgba(13,77,135,.24); }
+
+    .counter {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 10px;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 8px;
+      background: white;
+    }
+
+    .counter button {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      border: none;
+      background: #eef3f7;
+      color: var(--primary);
+      font-size: 18px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .switch,
+    .check-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .switch:last-child,
+    .check-row:last-child { border-bottom: none; }
+
+    .switch input,
+    .check-row input {
+      width: 18px;
+      min-height: 18px;
+      accent-color: var(--primary);
+    }
+
+    .bottom-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .boarding-pass {
+      background: white;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 16px 30px rgba(15,38,64,.08);
+      border: 1px solid rgba(16,38,63,.06);
+    }
+
+    .boarding-pass .pass-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .boarding-pass .pass-body {
+      padding: 14px;
+    }
+
+    .qr-wrap {
+      display: grid;
+      place-items: center;
+      padding: 16px 0 4px;
+    }
+
+    #qrCanvas {
+      width: 168px;
+      height: 168px;
+      border-radius: 18px;
+      background: white;
+      border: 1px solid var(--line);
+      padding: 10px;
+    }
+
+    .offline-note,
+    .success-note,
+    .info-note {
+      border-radius: 18px;
+      padding: 12px 14px;
+      font-size: 13px;
+      line-height: 1.45;
+      margin-top: 12px;
+    }
+
+    .offline-note { background: #eef4fa; color: var(--primary); }
+    .success-note { background: #ebfaf4; color: #0e885d; }
+    .info-note { background: #f8f5ec; color: #8f6a17; }
+
+    .bottom-nav {
+      margin: auto 12px 0;
+      background: rgba(255,255,255,.86);
+      backdrop-filter: blur(18px);
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.75);
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      padding: 8px;
+      gap: 6px;
+      box-shadow: 0 12px 28px rgba(20,34,56,.08);
+    }
+
+    .nav-btn {
+      min-height: 54px;
+      border: none;
+      background: transparent;
+      color: #6a7b8e;
+      border-radius: 16px;
+      display: grid;
+      gap: 3px;
+      place-items: center;
+      font-size: 11px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .nav-btn.active {
+      background: #edf3f8;
+      color: var(--primary);
+    }
+
+    .profile-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .profile-card {
+      background: white;
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      padding: 14px;
+    }
+
+    .badge-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+
+    .mini-badge {
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: #edf3f8;
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 20px;
+      background: linear-gradient(180deg, #174f87, #0d3457);
+      color: white;
+      display: grid;
+      place-items: center;
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .hidden { display: none !important; }
+
+    [dir="rtl"] .route-end:last-child,
+    [dir="rtl"] .ticket-top,
+    [dir="rtl"] .brand,
+    [dir="rtl"] .mini-head,
+    [dir="rtl"] .switch,
+    [dir="rtl"] .check-row,
+    [dir="rtl"] .airline-row,
+    [dir="rtl"] .section-head,
+    [dir="rtl"] .seat-map-head,
+    [dir="rtl"] .topbar,
+    [dir="rtl"] .ticket-meta,
+    [dir="rtl"] .pass-head,
+    [dir="rtl"] .row-2 {
+      direction: rtl;
+    }
+
+    [dir="rtl"] .route-line,
+    [dir="rtl"] .meta-row,
+    [dir="rtl"] .detail-grid,
+    [dir="rtl"] .steps,
+    [dir="rtl"] .bottom-nav,
+    [dir="rtl"] .actions-row,
+    [dir="rtl"] .flight-filters,
+    [dir="rtl"] .search-chips,
+    [dir="rtl"] .row-2,
+    [dir="rtl"] .bottom-actions,
+    [dir="rtl"] .ocr-grid,
+    [dir="rtl"] .seat-row {
+      direction: rtl;
+    }
+
+    [dir="rtl"] .section-head { text-align: right; }
+
+    @media (max-width: 430px) {
+      body { padding: 0; }
+      .phone { width: 100vw; height: 100dvh; border-radius: 0; border: none; }
+      .notch { top: 6px; }
+      .hint { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="app" id="appRoot">
+        <div class="statusbar">
+          <span>9:41</span>
+          <div class="status-icons"><span>◦◦◦</span><span>▮▮▮</span><span>100%</span></div>
+        </div>
+
+        <div class="sync-toast" id="syncToast">
+          <span>☁</span>
+          <div>
+            <strong id="syncToastTitle">Synced</strong>
+            <div id="syncToastBody">Latest updates are now available offline.</div>
+          </div>
+        </div>
+
+        <section class="screen active" id="screen-home">
+          <div class="topbar">
+            <button class="icon-btn" id="langToggleHome" title="Language">🌐</button>
+            <button class="icon-btn" data-nav="profile" title="Profile">👤</button>
+          </div>
+          <div class="content-scroll">
+            <div class="hero">
+              <div class="eyebrow"><span>●</span><span id="homeCountry">Australia</span></div>
+              <h1 id="heroCity">Sydney</h1>
+            </div>
+            <div class="hero-plane" aria-hidden="true">
+              <svg viewBox="0 0 120 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M57 8C57 3 63 3 63 8V55L99 81C104 85 100 93 94 91L63 81V114L76 129C79 132 77 138 72 138H48C43 138 41 132 44 129L57 114V81L26 91C20 93 16 85 21 81L57 55V8Z" fill="white" fill-opacity="0.96"/>
+                <path d="M57 81H63V152C63 156 57 156 57 152V81Z" fill="white"/>
+              </svg>
+            </div>
+            <div class="search-chips">
+              <button class="chip active"><span>✈</span><span id="chipRoute">SYD - NYC</span></button>
+              <button class="chip"><span>🗓</span><span id="chipDate">Date</span></button>
+              <button class="chip"><span>👤</span><span id="chipPassenger">Passengers</span></button>
+              <button class="chip"><span>🧳</span><span id="chipClass">Economy</span></button>
+            </div>
+            <div class="floating-card" style="margin-top: 12px;">
+              <div class="route-box">
+                <div class="label" data-i18n="from">From</div>
+                <div class="code" id="homeFromCode">SYD</div>
+                <div class="route-sub" id="homeFromCity">Sydney, Australia</div>
+                <button class="swap-btn" id="swapRoute" aria-label="Swap route">⇅</button>
+              </div>
+              <div class="route-box">
+                <div class="label" data-i18n="to">To</div>
+                <div class="code" id="homeToCode">NYC</div>
+                <div class="route-sub" id="homeToCity">New York, US</div>
+              </div>
+              <div class="actions-row">
+                <button class="round-action" data-nav="lookup" title="Lookup">✈</button>
+                <button class="cta-btn" data-nav="lookup"><span>⌕</span><span data-i18n="findTicket">Find Ticket</span></button>
+                <button class="round-action" data-nav="flights" title="Flights">☰</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen" id="screen-auth">
+          <div class="topbar left-title">
+            <button class="icon-btn" data-nav="home">←</button>
+            <div style="color:white;font-weight:700;" data-i18n="welcome">Welcome</div>
+          </div>
+          <div class="content-scroll">
+            <div class="auth-card">
+              <div class="auth-tabs">
+                <button class="tab-btn active" id="loginTab" data-mode="login" data-i18n="signIn">Sign In</button>
+                <button class="tab-btn" id="registerTab" data-mode="register" data-i18n="register">Register</button>
+              </div>
+              <div style="margin-top: 16px;">
+                <h2 class="auth-title" id="authTitle" data-i18n="signInTitle">Sign in to continue</h2>
+                <p class="subtext" id="authSubtitle" data-i18n="signInSub">Access your bookings, boarding pass and offline travel details.</p>
+              </div>
+              <div class="form-grid" id="authRegisterFields">
+                <div class="row-2 hidden" id="registerNamesRow">
+                  <div class="input-wrap">
+                    <label data-i18n="firstName">First name</label>
+                    <input type="text" id="firstName" placeholder="Jimmy" />
+                  </div>
+                  <div class="input-wrap">
+                    <label data-i18n="lastName">Last name</label>
+                    <input type="text" id="lastNameRegister" placeholder="Anton" />
+                  </div>
+                </div>
+                <div class="input-wrap hidden" id="registerPhoneWrap">
+                  <label data-i18n="phone">Phone</label>
+                  <input type="tel" id="phone" placeholder="+213 555 00 00 00" />
+                </div>
+                <div class="input-wrap">
+                  <label data-i18n="email">Email</label>
+                  <input type="email" id="authEmail" placeholder="jimmy@airmail.com" />
+                </div>
+                <div class="input-wrap">
+                  <label data-i18n="password">Password</label>
+                  <input type="password" id="authPassword" placeholder="••••••••" />
+                </div>
+              </div>
+              <div class="bottom-actions">
+                <button class="google-btn" id="googleBtn"><span class="google-mark">G</span><span data-i18n="continueGoogle">Continue with Google</span></button>
+                <button class="cta-btn" id="authSubmitBtn"><span data-i18n="signIn">Sign In</span></button>
+              </div>
+              <div class="success-note hidden" id="authNotice"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen" id="screen-lookup">
+          <div class="topbar left-title">
+            <button class="icon-btn" data-nav="home">←</button>
+            <div style="color:white;font-weight:700;" data-i18n="bookingLookup">Booking Lookup</div>
+          </div>
+          <div class="content-scroll">
+            <div class="lookup-hero">
+              <div class="eyebrow"><span>●</span><span data-i18n="retrieveBooking">Retrieve your flight</span></div>
+              <div style="font-size:32px;font-weight:300;letter-spacing:-.04em;" data-i18n="checkInJourney">Check-in journey</div>
+            </div>
+            <div class="panel">
+              <h2 class="panel-title" data-i18n="findYourBooking">Find your booking</h2>
+              <p class="panel-sub" data-i18n="lookupSub">Enter your booking reference and last name to display your itinerary and current check-in status.</p>
+              <div class="form-grid">
+                <div class="input-wrap">
+                  <label data-i18n="bookingRef">Booking reference</label>
+                  <input type="text" id="bookingRef" placeholder="AB12CD" maxlength="6" />
+                </div>
+                <div class="input-wrap">
+                  <label data-i18n="lastName">Last name</label>
+                  <input type="text" id="lookupLastName" placeholder="Anton" />
+                </div>
+                <button class="cta-btn" id="retrieveBookingBtn"><span>⌕</span><span data-i18n="retrieveBooking">Retrieve booking</span></button>
+              </div>
+            </div>
+
+            <div class="ticket-card hidden" id="bookingResultCard">
+              <div class="ticket-top">
+                <div class="brand">
+                  <div class="brand-badge">EA</div>
+                  <div class="brand-info">
+                    <div class="ticket-name" id="bookingAirlineName">Etihad Airways</div>
+                    <div class="mini-sub" id="bookingAircraft">Airbus A380</div>
+                  </div>
+                </div>
+                <span class="pill" id="bookingStatusPill">Check-in Open</span>
+              </div>
+              <div class="route-line">
+                <div class="route-end"><strong id="resultFrom">SYD</strong><span class="mini-sub" id="resultFromCity">Sydney, Australia</span></div>
+                <div class="plane-line">✈</div>
+                <div class="route-end"><strong id="resultTo">NYC</strong><span class="mini-sub" id="resultToCity">New York, US</span></div>
+              </div>
+              <div class="meta-row">
+                <div><div class="mini-label" data-i18n="departure">Departure</div><div class="mini-value" id="resultDate">Dec 12, 2025 · 09:45</div></div>
+                <div><div class="mini-label" data-i18n="duration">Duration</div><div class="mini-value">21h 35m</div></div>
+                <div><div class="mini-label" data-i18n="passenger">Passenger</div><div class="mini-value" id="resultPassenger">Jimmy Anton</div></div>
+              </div>
+              <div class="bottom-actions">
+                <button class="secondary-btn" data-nav="flights" data-i18n="seeFlights">See Flights</button>
+                <button class="cta-btn" id="startCheckinBtn"><span data-i18n="startCheckIn">Start Check-In</span></button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen" id="screen-flights">
+          <div class="topbar left-title">
+            <button class="icon-btn" data-nav="lookup">←</button>
+            <div style="color:white;font-weight:700;" data-i18n="flights">Flights</div>
+          </div>
+          <div class="content-scroll">
+            <div class="flight-filters" style="margin-bottom: 12px;">
+              <button class="chip active"><span>📍</span><span>SYD - NYC</span></button>
+              <button class="chip"><span>🗓</span><span>Dec 12, 2025</span></button>
+              <button class="chip"><span>👤</span><span>1 Adult</span></button>
+            </div>
+            <div id="flightsList"></div>
+          </div>
+        </section>
+
+        <section class="screen" id="screen-checkin">
+          <div class="topbar left-title">
+            <button class="icon-btn" id="checkinBackBtn">←</button>
+            <div style="color:white;font-weight:700;" data-i18n="onlineCheckIn">Online Check-In</div>
+          </div>
+          <div class="content-scroll">
+            <div class="steps" id="stepTracker"></div>
+            <div class="sheet" id="checkinStepContent"></div>
+          </div>
+        </section>
+
+        <section class="screen" id="screen-pass">
+          <div class="topbar left-title">
+            <button class="icon-btn" data-nav="lookup">←</button>
+            <div style="color:white;font-weight:700;" data-i18n="boardingPass">Boarding Pass</div>
+          </div>
+          <div class="content-scroll">
+            <div class="boarding-pass" id="boardingPassCard">
+              <div class="pass-head">
+                <div class="brand">
+                  <div class="brand-badge">EA</div>
+                  <div class="brand-info">
+                    <div class="ticket-name" id="passAirline">Etihad Airways</div>
+                    <div class="mini-sub" id="passAircraft">Airbus A380</div>
+                  </div>
+                </div>
+                <span class="pill" data-i18n="readyToBoard">Ready to board</span>
+              </div>
+              <div class="pass-body">
+                <div class="route-line" style="padding-top: 0;">
+                  <div class="route-end"><strong id="passFrom">SYD</strong><span class="mini-sub" id="passFromCity">Sydney, Australia</span></div>
+                  <div class="plane-line">✈</div>
+                  <div class="route-end"><strong id="passTo">NYC</strong><span class="mini-sub" id="passToCity">New York, US</span></div>
+                </div>
+                <div class="detail-grid">
+                  <div><div class="mini-label" data-i18n="passenger">Passenger</div><div class="mini-value" id="passengerName">Jimmy Anton</div></div>
+                  <div><div class="mini-label" data-i18n="date">Date</div><div class="mini-value" id="passDate">Dec 12, 2025</div></div>
+                  <div><div class="mini-label" data-i18n="class">Class</div><div class="mini-value" id="passClass">Economy</div></div>
+                  <div><div class="mini-label" data-i18n="terminal">Terminal</div><div class="mini-value">1</div></div>
+                  <div><div class="mini-label" data-i18n="seat">Seat</div><div class="mini-value" id="passSeat">30A</div></div>
+                  <div><div class="mini-label" data-i18n="gate">Gate</div><div class="mini-value">18</div></div>
+                </div>
+                <div class="qr-wrap"><canvas id="qrCanvas" width="168" height="168"></canvas></div>
+              </div>
+            </div>
+            <div class="offline-note" id="offlineStorageNote" data-i18n="offlineAccessText">Your boarding pass and flight summary are saved locally for offline access.</div>
+            <div class="bottom-actions">
+              <button class="secondary-btn" id="downloadPdfBtn"><span data-i18n="downloadPdf">Download PDF</span></button>
+              <button class="cta-btn" id="simulateSyncBtn"><span data-i18n="syncNow">Sync now</span></button>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen" id="screen-profile">
+          <div class="topbar left-title">
+            <button class="icon-btn" data-nav="home">←</button>
+            <div style="color:white;font-weight:700;" data-i18n="profile">Profile</div>
+          </div>
+          <div class="content-scroll">
+            <div class="panel">
+              <div class="mini-head">
+                <div class="brand" style="align-items:center;">
+                  <div class="avatar" id="profileAvatar">JA</div>
+                  <div>
+                    <h2 class="panel-title" id="profileName">Jimmy Anton</h2>
+                    <p class="panel-sub" id="profileEmail">jimmy@airmail.com</p>
+                  </div>
+                </div>
+                <button class="small-btn" data-nav="auth" data-i18n="edit">Edit</button>
+              </div>
+              <div class="badge-row">
+                <span class="mini-badge" data-i18n="offlineReady">Offline ready</span>
+                <span class="mini-badge" data-i18n="syncEnabled">Auto-sync enabled</span>
+                <span class="mini-badge" id="profileLanguageBadge">English</span>
+              </div>
+            </div>
+            <div class="profile-grid">
+              <div class="profile-card">
+                <div class="mini-label" data-i18n="travelPreferences">Travel preferences</div>
+                <div class="switch"><div><strong data-i18n="mealPreference">Meal preference</strong><div class="mini-sub" id="mealPreferenceValue">Standard</div></div><button class="small-btn" id="cycleMealBtn" data-i18n="change">Change</button></div>
+                <div class="switch"><div><strong data-i18n="specialAssistance">Special assistance</strong><div class="mini-sub" id="assistanceValue">None</div></div><button class="small-btn" id="toggleAssistanceBtn" data-i18n="toggle">Toggle</button></div>
+              </div>
+              <div class="profile-card">
+                <div class="mini-label" data-i18n="appSettings">App settings</div>
+                <div class="switch"><div><strong data-i18n="language">Language</strong><div class="mini-sub" id="languageValue">English</div></div><button class="small-btn" id="langToggleProfile" data-i18n="switchLang">Switch</button></div>
+                <div class="switch"><div><strong data-i18n="cacheStatus">Offline cache</strong><div class="mini-sub" data-i18n="storedLocally">Stored locally on device</div></div><button class="small-btn" id="clearCacheBtn" data-i18n="clear">Clear</button></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <nav class="bottom-nav" id="bottomNav">
+          <button class="nav-btn active" data-nav="home"><span>⌂</span><span data-i18n="navHome">Home</span></button>
+          <button class="nav-btn" data-nav="lookup"><span>⌕</span><span data-i18n="navLookup">Lookup</span></button>
+          <button class="nav-btn" data-nav="flights"><span>✈</span><span data-i18n="navFlights">Flights</span></button>
+          <button class="nav-btn" data-nav="pass"><span>▣</span><span data-i18n="navPass">Pass</span></button>
+          <button class="nav-btn" data-nav="profile"><span>☻</span><span data-i18n="navProfile">Profile</span></button>
+        </nav>
+      </div>
+    </div>
+    <div class="hint">Single-page mobile HTML app with embedded styles and logic. Use <strong>lang-en.js</strong> and <strong>lang-fr.js</strong> as separate language files, with automatic local caching, check-in flow, seat selection, boarding pass generation, and print-to-PDF support.</div>
+  </div>
+
+  <script src="lang-en.js"></script>
+  <script src="lang-fr.js"></script>
+  <script>
+    const BOOKING_DB = {
+      code: 'AB12CD',
+      lastName: 'Anton',
+      passenger: 'Jimmy Anton',
+      airline: 'Etihad Airways',
+      aircraft: 'Airbus A380',
+      fromCode: 'SYD',
+      fromCity: 'Sydney, Australia',
+      toCode: 'NYC',
+      toCity: 'New York, US',
+      departDate: 'Dec 12, 2025',
+      departTime: '09:45',
+      duration: '21h 35m',
+      gate: '18',
+      terminal: '1',
+      seat: '30A',
+      className: 'Economy',
+      price: '$ 1,363'
+    };
+
+    const FLIGHTS = [
+      { airline: 'Etihad Airways', aircraft: 'Airbus A380', className: 'Economy', price: '$ 1,363', badge: 'EA' },
+      { airline: 'Qatar Airways', aircraft: 'Airbus A1000', className: 'Economy', price: '$ 1,324', badge: 'QA' },
+      { airline: 'Cathay Pacific', aircraft: 'Airbus A350', className: 'Economy', price: '$ 1,297', badge: 'CX' }
+    ];
+
+    const MEALS = ['Standard', 'Vegetarian', 'Halal', 'Vegan'];
+
+    const state = {
+      screen: 'home',
+      authMode: 'login',
+      lang: localStorage.getItem('airapp_lang') || 'en',
+      isRegistered: JSON.parse(localStorage.getItem('airapp_registered') || 'false'),
+      user: JSON.parse(localStorage.getItem('airapp_user') || 'null') || {
+        name: 'Jimmy Anton',
+        email: 'jimmy@airmail.com',
+        phone: '+213 555 00 00 00',
+        meal: 'Standard',
+        assistance: false
+      },
+      bookingLoaded: JSON.parse(localStorage.getItem('airapp_bookingLoaded') || 'false'),
+      booking: JSON.parse(localStorage.getItem('airapp_booking') || 'null') || null,
+      step: Number(localStorage.getItem('airapp_step') || 0),
+      checkin: JSON.parse(localStorage.getItem('airapp_checkin') || 'null') || {
+        passportScanned: false,
+        passportFileName: '',
+        passportData: { firstName: 'Jimmy', lastName: 'Anton', passportNumber: 'P4839201', nationality: 'Australia' },
+        confirmed: false,
+        seat: '30A',
+        cabinBags: 1,
+        checkedBags: 1,
+        specialMeal: 'Standard',
+        assistance: false,
+        travelingWithInfant: false,
+        travelingWithPet: false,
+        notes: ''
+      }
+    };
+
+    const screens = [...document.querySelectorAll('.screen')];
+    const navButtons = [...document.querySelectorAll('[data-nav]')];
+    const stepNames = ['passport', 'review', 'seat', 'bags', 'requests'];
+
+    function saveState() {
+      localStorage.setItem('airapp_lang', state.lang);
+      localStorage.setItem('airapp_registered', JSON.stringify(state.isRegistered));
+      localStorage.setItem('airapp_user', JSON.stringify(state.user));
+      localStorage.setItem('airapp_bookingLoaded', JSON.stringify(state.bookingLoaded));
+      localStorage.setItem('airapp_booking', JSON.stringify(state.booking));
+      localStorage.setItem('airapp_step', String(state.step));
+      localStorage.setItem('airapp_checkin', JSON.stringify(state.checkin));
+    }
+
+    function t(key) {
+      return (window.APP_LANGS?.[state.lang] || {})[key] || key;
+    }
+
+    function applyTranslations() {
+      document.documentElement.lang = state.lang;
+      document.documentElement.dir = state.lang === 'fr' ? 'ltr' : 'ltr';
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        el.textContent = t(el.dataset.i18n);
+      });
+      document.getElementById('homeCountry').textContent = t('homeCountry');
+      document.getElementById('heroCity').textContent = t('heroCity');
+      document.getElementById('chipDate').textContent = t('date');
+      document.getElementById('chipPassenger').textContent = t('passengers');
+      document.getElementById('chipClass').textContent = t('economy');
+      document.getElementById('profileLanguageBadge').textContent = t(state.lang === 'en' ? 'english' : 'french');
+      document.getElementById('languageValue').textContent = t(state.lang === 'en' ? 'english' : 'french');
+      document.getElementById('profileEmail').textContent = state.user.email;
+      document.getElementById('mealPreferenceValue').textContent = state.user.meal;
+      document.getElementById('assistanceValue').textContent = state.user.assistance ? t('enabled') : t('none');
+      document.getElementById('syncToastTitle').textContent = t('synced');
+      document.getElementById('syncToastBody').textContent = t('syncToastBody');
+      renderFlights();
+      renderCheckin();
+    }
+
+    function setScreen(name) {
+      state.screen = name;
+      screens.forEach(screen => screen.classList.toggle('active', screen.id === `screen-${name}`));
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.nav === name));
+      if (name === 'pass') renderBoardingPass();
+      if (name === 'profile') renderProfile();
+      if (name === 'checkin') renderCheckin();
+      saveState();
+    }
+
+    function showToast(messageTitle = t('synced'), messageBody = t('syncToastBody')) {
+      const toast = document.getElementById('syncToast');
+      document.getElementById('syncToastTitle').textContent = messageTitle;
+      document.getElementById('syncToastBody').textContent = messageBody;
+      toast.classList.add('show');
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => toast.classList.remove('show'), 2300);
+    }
+
+    function renderFlights() {
+      const list = document.getElementById('flightsList');
+      list.innerHTML = '';
+      FLIGHTS.forEach((flight, index) => {
+        const card = document.createElement('div');
+        card.className = 'flight-card';
+        card.innerHTML = `
+          <div class="airline-row">
+            <div class="brand">
+              <div class="brand-badge">${flight.badge}</div>
+              <div class="brand-info">
+                <div class="brand-sub">${flight.airline}</div>
+                <div class="flight-name">${flight.aircraft}</div>
+              </div>
+            </div>
+            <span class="pill">${t('economy')}</span>
+          </div>
+          <div class="route-line">
+            <div class="route-end"><strong>${BOOKING_DB.fromCode}</strong><span class="mini-sub">${BOOKING_DB.fromCity}</span><div class="mini-sub">${BOOKING_DB.departTime}</div></div>
+            <div class="plane-line">✈</div>
+            <div class="route-end"><strong>${BOOKING_DB.toCode}</strong><span class="mini-sub">${BOOKING_DB.toCity}</span><div class="mini-sub">05:15 AM</div></div>
+          </div>
+          <div class="meta-row">
+            <div><div class="mini-label">${t('date')}</div><div class="mini-value">${BOOKING_DB.departDate}</div></div>
+            <div><div class="mini-label">${t('duration')}</div><div class="mini-value">${BOOKING_DB.duration}</div></div>
+            <div><div class="mini-label">${t('price')}</div><div class="mini-value">${flight.price}</div></div>
+          </div>
+          <div style="margin-top:12px;"><button class="cta-btn" style="width:100%;" data-pick-flight="${index}">${t('selectFlight')}</button></div>
+        `;
+        list.appendChild(card);
+      });
+      list.querySelectorAll('[data-pick-flight]').forEach(btn => {
+        btn.onclick = () => {
+          state.booking = { ...BOOKING_DB, ...FLIGHTS[btn.dataset.pickFlight] };
+          state.bookingLoaded = true;
+          fillBookingResult();
+          setScreen('lookup');
+          showToast(t('flightSelected'), t('bookingReady'));
+        };
+      });
+    }
+
+    function fillBookingResult() {
+      if (!state.bookingLoaded) return;
+      const b = state.booking || BOOKING_DB;
+      document.getElementById('bookingResultCard').classList.remove('hidden');
+      document.getElementById('bookingAirlineName').textContent = b.airline;
+      document.getElementById('bookingAircraft').textContent = b.aircraft;
+      document.getElementById('bookingStatusPill').textContent = t('checkinOpen');
+      document.getElementById('resultFrom').textContent = b.fromCode;
+      document.getElementById('resultFromCity').textContent = b.fromCity;
+      document.getElementById('resultTo').textContent = b.toCode;
+      document.getElementById('resultToCity').textContent = b.toCity;
+      document.getElementById('resultDate').textContent = `${b.departDate} · ${b.departTime}`;
+      document.getElementById('resultPassenger').textContent = state.user.name;
+    }
+
+    function setAuthMode(mode) {
+      state.authMode = mode;
+      const loginActive = mode === 'login';
+      document.getElementById('loginTab').classList.toggle('active', loginActive);
+      document.getElementById('registerTab').classList.toggle('active', !loginActive);
+      document.getElementById('registerNamesRow').classList.toggle('hidden', loginActive);
+      document.getElementById('registerPhoneWrap').classList.toggle('hidden', loginActive);
+      document.getElementById('authTitle').textContent = t(loginActive ? 'signInTitle' : 'registerTitle');
+      document.getElementById('authSubtitle').textContent = t(loginActive ? 'signInSub' : 'registerSub');
+      document.getElementById('authSubmitBtn').innerHTML = `<span>${t(loginActive ? 'signIn' : 'createAccount')}</span>`;
+    }
+
+    function handleAuth(google = false) {
+      const notice = document.getElementById('authNotice');
+      const email = document.getElementById('authEmail').value.trim() || state.user.email;
+      const pass = document.getElementById('authPassword').value.trim();
+      const first = document.getElementById('firstName').value.trim() || 'Jimmy';
+      const last = document.getElementById('lastNameRegister').value.trim() || 'Anton';
+      const phone = document.getElementById('phone').value.trim() || state.user.phone;
+      if (!google && !email) return;
+      if (state.authMode === 'register' && !google) {
+        state.user = { ...state.user, name: `${first} ${last}`.trim(), email, phone };
+        state.isRegistered = true;
+        notice.textContent = t('accountCreated');
+      } else {
+        state.user = { ...state.user, email, name: state.user.name || `${first} ${last}`.trim() };
+        notice.textContent = google ? t('signedGoogle') : t('signedInSuccess');
+      }
+      notice.classList.remove('hidden');
+      renderProfile();
+      fillBookingResult();
+      saveState();
+      setTimeout(() => setScreen('lookup'), 700);
+    }
+
+    function renderCheckin() {
+      const tracker = document.getElementById('stepTracker');
+      tracker.innerHTML = '';
+      stepNames.forEach((name, index) => {
+        const step = document.createElement('div');
+        step.className = `step ${state.step === index ? 'active' : state.step > index ? 'done' : ''}`;
+        step.innerHTML = `<div class="step-dot">${index + 1}</div><div class="step-label">${t(name)}</div>`;
+        tracker.appendChild(step);
+      });
+
+      const content = document.getElementById('checkinStepContent');
+      const templates = [renderPassportStep, renderReviewStep, renderSeatStep, renderBagsStep, renderRequestsStep];
+      content.innerHTML = templates[state.step]();
+      bindCheckinEvents();
+    }
+
+    function renderPassportStep() {
+      return `
+        <h2 class="sheet-title">${t('passportScan')}</h2>
+        <p class="panel-sub">${t('passportSub')}</p>
+        <div class="scan-box" style="margin-top:14px;">
+          <div class="passport-shell"><div class="scan-line"></div><div style="position:relative;z-index:1;text-align:center;"><div style="font-size:34px;">🛂</div><div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;">${t('passport')}</div></div></div>
+          <div class="muted">${state.checkin.passportFileName || t('uploadPassport')}</div>
+          <div class="bottom-actions" style="width:100%;margin-top:0;">
+            <label class="secondary-btn" style="display:grid;place-items:center;cursor:pointer;">${t('uploadScan')}<input type="file" id="passportFile" accept="image/*,.pdf" class="hidden" /></label>
+            <button class="cta-btn" id="simulateScanBtn">${t('simulateOcr')}</button>
+          </div>
+        </div>
+        <div class="ocr-grid">
+          <div class="ocr-box"><div class="mini-label">${t('firstName')}</div><div class="mini-value">${state.checkin.passportData.firstName}</div></div>
+          <div class="ocr-box"><div class="mini-label">${t('lastName')}</div><div class="mini-value">${state.checkin.passportData.lastName}</div></div>
+          <div class="ocr-box"><div class="mini-label">${t('passportNumber')}</div><div class="mini-value">${state.checkin.passportData.passportNumber}</div></div>
+          <div class="ocr-box"><div class="mini-label">${t('nationality')}</div><div class="mini-value">${state.checkin.passportData.nationality}</div></div>
+        </div>
+        <div class="info-note">${t('ocrVerify')}</div>
+        <div class="bottom-actions"><button class="secondary-btn" data-nav="lookup">${t('cancel')}</button><button class="cta-btn" id="nextStepBtn">${t('continue')}</button></div>
+      `;
+    }
+
+    function renderReviewStep() {
+      return `
+        <h2 class="sheet-title">${t('detailsReview')}</h2>
+        <p class="panel-sub">${t('reviewSub')}</p>
+        <div class="detail-grid" style="margin-top:16px;border-top:none;padding-top:0;">
+          <div><div class="mini-label">${t('passenger')}</div><div class="mini-value">${state.user.name}</div></div>
+          <div><div class="mini-label">${t('email')}</div><div class="mini-value">${state.user.email}</div></div>
+          <div><div class="mini-label">${t('flight')}</div><div class="mini-value">${BOOKING_DB.fromCode} → ${BOOKING_DB.toCode}</div></div>
+          <div><div class="mini-label">${t('date')}</div><div class="mini-value">${BOOKING_DB.departDate}</div></div>
+          <div><div class="mini-label">${t('passportNumber')}</div><div class="mini-value">${state.checkin.passportData.passportNumber}</div></div>
+          <div><div class="mini-label">${t('nationality')}</div><div class="mini-value">${state.checkin.passportData.nationality}</div></div>
+        </div>
+        <div class="check-row"><div><strong>${t('confirmDetails')}</strong><div class="mini-sub">${t('confirmDetailsSub')}</div></div><input type="checkbox" id="confirmDetailsCheck" ${state.checkin.confirmed ? 'checked' : ''}></div>
+        <div class="bottom-actions"><button class="secondary-btn" id="prevStepBtn">${t('back')}</button><button class="cta-btn" id="nextStepBtn">${t('continue')}</button></div>
+      `;
+    }
+
+    function renderSeatStep() {
+      const rows = Array.from({ length: 8 }, (_, i) => 28 + i).map(row => {
+        const cols = ['A','B','C','D','E','F'];
+        const cells = cols.map(col => {
+          const code = `${row}${col}`;
+          const occupied = ['29C','30D','31A','33E'].includes(code);
+          const premium = row <= 29;
+          const selected = state.checkin.seat === code;
+          const cls = occupied ? 'occupied' : selected ? 'selected' : premium ? 'premium available' : 'available';
+          return `<button class="seat ${cls}" data-seat="${code}" ${occupied ? 'disabled' : ''}>${col}</button>`;
+        });
+        return `<div class="seat-row"><div class="row-label">${row}</div>${cells.slice(0,3).join('')}<div class="aisle-label">|</div>${cells.slice(3).join('')}</div>`;
+      }).join('');
+      return `
+        <h2 class="sheet-title">${t('seatSelection')}</h2>
+        <p class="panel-sub">${t('seatSub')}</p>
+        <div class="seat-map" style="margin-top:14px;">
+          <div class="seat-map-head"><strong>${t('deckPlan')}</strong><span class="pill">${t('selectedSeat')}: ${state.checkin.seat}</span></div>
+          <div class="legend">
+            <span><i class="dot" style="background:#eef3f7"></i>${t('available')}</span>
+            <span><i class="dot" style="background:#d8e1ea"></i>${t('occupied')}</span>
+            <span><i class="dot" style="background:#f7ead2"></i>${t('premium')}</span>
+            <span><i class="dot" style="background:#0d4d87"></i>${t('selected')}</span>
+          </div>
+          <div class="seat-grid">${rows}</div>
+        </div>
+        <div class="bottom-actions"><button class="secondary-btn" id="prevStepBtn">${t('back')}</button><button class="cta-btn" id="nextStepBtn">${t('continue')}</button></div>
+      `;
+    }
+
+    function renderBagsStep() {
+      return `
+        <h2 class="sheet-title">${t('baggageDeclaration')}</h2>
+        <p class="panel-sub">${t('bagsSub')}</p>
+        <div style="display:grid;gap:12px;margin-top:14px;">
+          <div>
+            <div class="field-label">${t('cabinBag')}</div>
+            <div class="counter"><button data-counter="cabinBags" data-change="-1">−</button><strong>${state.checkin.cabinBags}</strong><button data-counter="cabinBags" data-change="1">+</button></div>
+          </div>
+          <div>
+            <div class="field-label">${t('checkedBag')}</div>
+            <div class="counter"><button data-counter="checkedBags" data-change="-1">−</button><strong>${state.checkin.checkedBags}</strong><button data-counter="checkedBags" data-change="1">+</button></div>
+          </div>
+          <div class="info-note">${t('bagNote')}</div>
+        </div>
+        <div class="bottom-actions"><button class="secondary-btn" id="prevStepBtn">${t('back')}</button><button class="cta-btn" id="nextStepBtn">${t('continue')}</button></div>
+      `;
+    }
+
+    function renderRequestsStep() {
+      return `
+        <h2 class="sheet-title">${t('specialRequests')}</h2>
+        <p class="panel-sub">${t('requestsSub')}</p>
+        <div class="form-grid" style="margin-top:14px;">
+          <div class="select-wrap">
+            <label>${t('mealPreference')}</label>
+            <select id="specialMealSelect">
+              ${MEALS.map(meal => `<option ${state.checkin.specialMeal === meal ? 'selected' : ''}>${meal}</option>`).join('')}
+            </select>
+          </div>
+          <label class="switch"><div><strong>${t('specialAssistance')}</strong><div class="mini-sub">${t('assistanceSub')}</div></div><input type="checkbox" id="assistanceToggle" ${state.checkin.assistance ? 'checked' : ''}></label>
+          <label class="switch"><div><strong>${t('infant')}</strong><div class="mini-sub">${t('infantSub')}</div></div><input type="checkbox" id="infantToggle" ${state.checkin.travelingWithInfant ? 'checked' : ''}></label>
+          <label class="switch"><div><strong>${t('pet')}</strong><div class="mini-sub">${t('petSub')}</div></div><input type="checkbox" id="petToggle" ${state.checkin.travelingWithPet ? 'checked' : ''}></label>
+          <div class="textarea-wrap"><label>${t('additionalNotes')}</label><textarea id="notesInput" placeholder="${t('notesPlaceholder')}">${state.checkin.notes}</textarea></div>
+        </div>
+        <div class="success-note">${t('completionNote')}</div>
+        <div class="bottom-actions"><button class="secondary-btn" id="prevStepBtn">${t('back')}</button><button class="cta-btn" id="completeCheckinBtn">${t('completeCheckIn')}</button></div>
+      `;
+    }
+
+    function bindCheckinEvents() {
+      document.getElementById('passportFile')?.addEventListener('change', e => {
+        const file = e.target.files[0];
+        if (file) {
+          state.checkin.passportFileName = file.name;
+          state.checkin.passportScanned = true;
+          saveState();
+          renderCheckin();
+        }
+      });
+
+      document.getElementById('simulateScanBtn')?.addEventListener('click', () => {
+        state.checkin.passportScanned = true;
+        state.checkin.passportFileName = 'passport_scan.jpg';
+        state.checkin.passportData = { firstName: 'Jimmy', lastName: 'Anton', passportNumber: 'P4839201', nationality: 'Australia' };
+        saveState();
+        showToast(t('ocrComplete'), t('identityVerified'));
+        renderCheckin();
+      });
+
+      document.getElementById('confirmDetailsCheck')?.addEventListener('change', e => {
+        state.checkin.confirmed = e.target.checked;
+        saveState();
+      });
+
+      document.querySelectorAll('[data-seat]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.checkin.seat = btn.dataset.seat;
+          saveState();
+          renderCheckin();
+        });
+      });
+
+      document.querySelectorAll('[data-counter]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const key = btn.dataset.counter;
+          const next = state.checkin[key] + Number(btn.dataset.change);
+          state.checkin[key] = Math.max(0, Math.min(4, next));
+          saveState();
+          renderCheckin();
+        });
+      });
+
+      document.getElementById('specialMealSelect')?.addEventListener('change', e => {
+        state.checkin.specialMeal = e.target.value;
+        state.user.meal = e.target.value;
+        saveState();
+      });
+
+      document.getElementById('assistanceToggle')?.addEventListener('change', e => {
+        state.checkin.assistance = e.target.checked;
+        state.user.assistance = e.target.checked;
+        saveState();
+      });
+
+      document.getElementById('infantToggle')?.addEventListener('change', e => state.checkin.travelingWithInfant = e.target.checked);
+      document.getElementById('petToggle')?.addEventListener('change', e => state.checkin.travelingWithPet = e.target.checked);
+      document.getElementById('notesInput')?.addEventListener('input', e => state.checkin.notes = e.target.value);
+
+      document.getElementById('prevStepBtn')?.addEventListener('click', () => {
+        state.step = Math.max(0, state.step - 1);
+        saveState();
+        renderCheckin();
+      });
+
+      document.getElementById('nextStepBtn')?.addEventListener('click', () => {
+        if (state.step === 0 && !state.checkin.passportScanned) return showToast(t('passportNeeded'), t('scanFirst'));
+        if (state.step === 1 && !state.checkin.confirmed) return showToast(t('confirmRequired'), t('confirmBeforeContinue'));
+        state.step = Math.min(stepNames.length - 1, state.step + 1);
+        saveState();
+        renderCheckin();
+      });
+
+      document.getElementById('completeCheckinBtn')?.addEventListener('click', () => {
+        state.bookingLoaded = true;
+        state.booking = { ...BOOKING_DB, passenger: state.user.name, seat: state.checkin.seat, className: 'Economy' };
+        saveState();
+        renderBoardingPass();
+        setScreen('pass');
+        showToast(t('checkinComplete'), t('boardingPassReady'));
+      });
+    }
+
+    function renderBoardingPass() {
+      const b = state.booking || BOOKING_DB;
+      document.getElementById('passAirline').textContent = b.airline;
+      document.getElementById('passAircraft').textContent = b.aircraft;
+      document.getElementById('passFrom').textContent = b.fromCode;
+      document.getElementById('passFromCity').textContent = b.fromCity;
+      document.getElementById('passTo').textContent = b.toCode;
+      document.getElementById('passToCity').textContent = b.toCity;
+      document.getElementById('passengerName').textContent = state.user.name;
+      document.getElementById('passDate').textContent = b.departDate;
+      document.getElementById('passClass').textContent = b.className || 'Economy';
+      document.getElementById('passSeat').textContent = state.checkin.seat;
+      drawQR(`${b.code}|${state.user.name}|${state.checkin.seat}|${b.fromCode}-${b.toCode}|${b.departDate}`);
+    }
+
+    function drawQR(seed) {
+      const canvas = document.getElementById('qrCanvas');
+      const ctx = canvas.getContext('2d');
+      const size = 21;
+      const cell = canvas.width / size;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      function hash(str) {
+        let h = 2166136261;
+        for (let i = 0; i < str.length; i++) h = Math.imul(h ^ str.charCodeAt(i), 16777619);
+        return h >>> 0;
+      }
+      const seedNum = hash(seed);
+      function bit(x, y) {
+        const n = hash(`${seedNum}:${x}:${y}`);
+        return (n % 100) > 46;
+      }
+      function finder(x0, y0) {
+        ctx.fillStyle = '#0e2742';
+        ctx.fillRect(x0 * cell, y0 * cell, 7 * cell, 7 * cell);
+        ctx.fillStyle = '#fff';
+        ctx.fillRect((x0 + 1) * cell, (y0 + 1) * cell, 5 * cell, 5 * cell);
+        ctx.fillStyle = '#0e2742';
+        ctx.fillRect((x0 + 2) * cell, (y0 + 2) * cell, 3 * cell, 3 * cell);
+      }
+      finder(0,0); finder(14,0); finder(0,14);
+      for (let y = 0; y < size; y++) {
+        for (let x = 0; x < size; x++) {
+          const inFinder = (x < 7 && y < 7) || (x > 13 && y < 7) || (x < 7 && y > 13);
+          if (inFinder) continue;
+          if (bit(x,y)) {
+            ctx.fillStyle = '#10263f';
+            ctx.fillRect(x * cell, y * cell, cell, cell);
+          }
+        }
+      }
+    }
+
+    function renderProfile() {
+      document.getElementById('profileName').textContent = state.user.name;
+      document.getElementById('profileEmail').textContent = state.user.email;
+      document.getElementById('profileAvatar').textContent = state.user.name.split(' ').map(n => n[0]).slice(0,2).join('').toUpperCase();
+      document.getElementById('mealPreferenceValue').textContent = state.user.meal;
+      document.getElementById('assistanceValue').textContent = state.user.assistance ? t('enabled') : t('none');
+    }
+
+    document.getElementById('swapRoute').addEventListener('click', () => {
+      const fromCode = document.getElementById('homeFromCode');
+      const fromCity = document.getElementById('homeFromCity');
+      const toCode = document.getElementById('homeToCode');
+      const toCity = document.getElementById('homeToCity');
+      [fromCode.textContent, toCode.textContent] = [toCode.textContent, fromCode.textContent];
+      [fromCity.textContent, toCity.textContent] = [toCity.textContent, fromCity.textContent];
+    });
+
+    navButtons.forEach(btn => btn.addEventListener('click', () => setScreen(btn.dataset.nav)));
+
+    document.getElementById('loginTab').addEventListener('click', () => setAuthMode('login'));
+    document.getElementById('registerTab').addEventListener('click', () => setAuthMode('register'));
+    document.getElementById('googleBtn').addEventListener('click', () => handleAuth(true));
+    document.getElementById('authSubmitBtn').addEventListener('click', () => handleAuth(false));
+
+    document.getElementById('retrieveBookingBtn').addEventListener('click', () => {
+      const code = document.getElementById('bookingRef').value.trim().toUpperCase();
+      const lastName = document.getElementById('lookupLastName').value.trim();
+      const ok = (!code || code === BOOKING_DB.code) && (!lastName || lastName.toLowerCase() === BOOKING_DB.lastName.toLowerCase());
+      if (!ok) return showToast(t('bookingNotFound'), t('checkReference'));
+      state.bookingLoaded = true;
+      state.booking = { ...BOOKING_DB, passenger: state.user.name };
+      fillBookingResult();
+      saveState();
+      showToast(t('bookingFound'), t('itineraryLoaded'));
+    });
+
+    document.getElementById('startCheckinBtn').addEventListener('click', () => {
+      state.step = 0;
+      saveState();
+      setScreen('checkin');
+    });
+
+    document.getElementById('checkinBackBtn').addEventListener('click', () => {
+      if (state.step > 0) {
+        state.step -= 1;
+        renderCheckin();
+      } else {
+        setScreen('lookup');
+      }
+    });
+
+    document.getElementById('downloadPdfBtn').addEventListener('click', () => {
+      renderBoardingPass();
+      showToast(t('pdfReady'), t('printDialogInfo'));
+      window.print();
+    });
+
+    document.getElementById('simulateSyncBtn').addEventListener('click', () => {
+      saveState();
+      showToast(t('synced'), t('syncToastBody'));
+    });
+
+    document.getElementById('langToggleHome').addEventListener('click', toggleLanguage);
+    document.getElementById('langToggleProfile').addEventListener('click', toggleLanguage);
+
+    function toggleLanguage() {
+      state.lang = state.lang === 'en' ? 'fr' : 'en';
+      saveState();
+      applyTranslations();
+      showToast(t('languageUpdated'), t('languageApplied'));
+    }
+
+    document.getElementById('cycleMealBtn').addEventListener('click', () => {
+      const current = MEALS.indexOf(state.user.meal);
+      state.user.meal = MEALS[(current + 1) % MEALS.length];
+      state.checkin.specialMeal = state.user.meal;
+      saveState();
+      renderProfile();
+    });
+
+    document.getElementById('toggleAssistanceBtn').addEventListener('click', () => {
+      state.user.assistance = !state.user.assistance;
+      state.checkin.assistance = state.user.assistance;
+      saveState();
+      renderProfile();
+    });
+
+    document.getElementById('clearCacheBtn').addEventListener('click', () => {
+      localStorage.removeItem('airapp_booking');
+      localStorage.removeItem('airapp_bookingLoaded');
+      state.bookingLoaded = false;
+      state.booking = null;
+      document.getElementById('bookingResultCard').classList.add('hidden');
+      showToast(t('cacheCleared'), t('localDataRemoved'));
+    });
+
+    window.addEventListener('online', () => showToast(t('connected'), t('syncToastBody')));
+    window.addEventListener('offline', () => showToast(t('offlineMode'), t('usingCachedData')));
+
+    function init() {
+      setAuthMode(state.authMode);
+      applyTranslations();
+      renderProfile();
+      if (state.bookingLoaded) fillBookingResult();
+      renderBoardingPass();
+      setScreen(state.screen);
+    }
+
+    init();
+  </script>
+</body>
+</html>
